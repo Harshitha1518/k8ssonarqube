@@ -6,7 +6,7 @@ pipeline{
     stages{
         stage('SCM'){
             steps{
-                git branch: 'main', url: 'https://github.com/Agasthyahm/calculator-java.git'
+                git branch: 'main', url: 'https://github.com/Harshitha1518/k8ssonarqube.git'
             }
         }
         stage('sonar analysis'){
