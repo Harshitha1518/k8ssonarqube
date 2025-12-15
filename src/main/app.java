@@ -2,14 +2,6 @@ package com.example.utils;
 
 public class StringUtils {
 
-    public boolean isPalindrome(String input) {
-        if (input == null) {
-            return false;
-        }
-        String clean = input.replaceAll("\\s+", "").toLowerCase();
-        return new StringBuilder(clean).reverse().toString().equals(clean);
-    }
-
     public String reverse(String input) {
         if (input == null) {
             return "";
@@ -17,10 +9,12 @@ public class StringUtils {
         return new StringBuilder(input).reverse().toString();
     }
 
-    public int wordCount(String input) {
-        if (input == null || input.trim().isEmpty()) {
-            return 0;
+    public boolean isPalindrome(String input) {
+        if (input == null) {
+            return false;
         }
-        return input.trim().split("\\s+").length;
+        String clean = input.replaceAll("\\s+", "").toLowerCase();
+        return clean.equals(new StringBuilder(clean).reverse().toString());
     }
 }
+
