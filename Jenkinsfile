@@ -1,5 +1,8 @@
 pipeline{
     agent any
+    tools {
+        maven 'M3'
+    }
     environment{
         PROJECT_KEY="string-utils-project"
     }
