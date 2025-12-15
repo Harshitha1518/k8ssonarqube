@@ -17,4 +17,3 @@ public class StringUtils {
         return clean.equals(new StringBuilder(clean).reverse().toString());
     }
 }
-
