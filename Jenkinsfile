@@ -1,7 +1,7 @@
 pipeline{
     agent any
     environment{
-        PROJECT_KEY="java-calculator-k8s"
+        PROJECT_KEY="string-utils-project"
     }
     stages{
         stage('SCM'){
