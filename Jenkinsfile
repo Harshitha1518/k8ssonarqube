@@ -1,11 +1,5 @@
 pipeline{
     agent any
-    
-    tools {
-maven 'M3' // Make sure 'M3' is configured under Jenkins Global Tool
-Configuration
-    }
-        
     environment{
         PROJECT_KEY="string-utils-project"
     }
