@@ -22,4 +22,57 @@ pipeline {
             steps {
                 withSonarQubeEnv('sonar-k8s') {
                     sh """
-                        mvn clean verify
+                        mvn clean verify sonar:sonar \
+                        -Dsonar.projectKey=${PROJECT_KEY} \
+                        -Dsonar.projectName=${PROJECT_KEY}
+                    """
+                }
+            }
+        }
+
+        stage('Quality Gate Validate') {
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
+
+        stage('Nexus-artifactory') {
+            steps {
+                nexusArtifactUploader(
+                    nexusVersion: 'nexus3',
+                    protocol: 'http',
+                    nexusUrl: '3.7.74.172:30002',
+                    groupId: 'com.example',
+                    version: '1.0',
+                    repository: 'maven-releases',
+                    credentialsId: 'nexus-creds',
+                    artifacts: [
+                        [
+                            artifactId: 'string-utils',
+                            classifier: '',
+                            file: 'target/string-utils-1.0.jar',
+                            type: 'jar'
+                        ]
+                    ]
+                )
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Build successful and artifact pushed to Nexus"
+        }
+        failure {
+            echo "Pipeline failed"
+        }
+    }
+}
