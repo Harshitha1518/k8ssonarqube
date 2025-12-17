@@ -53,7 +53,7 @@ pipeline {
                     groupId: 'com.example',
                     version: '1.0',
                     repository: 'maven-releases',
-                    credentialsId: 'nexus-creds',
+                    credentialsId: 'harshi',
                     artifacts: [
                         [
                             artifactId: 'string-utils',
