@@ -79,7 +79,7 @@ pipeline {
                     passwordVariable: 'NEXUS_PASS'
                 )]) {
                     sh """
-                    cp /home/ubuntu/Dockerfile \
+                    cp /home/ubuntu/Dockerfile . \
                     docker build \
                     --build-arg NEXUS_USER=${NEXUS_USER} \
                     --build-arg NEXUS_PASS=${NEXUS_PASS} \
