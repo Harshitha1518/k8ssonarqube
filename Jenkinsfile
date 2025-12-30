@@ -80,8 +80,6 @@ pipeline {
                 )]) {
                     
                     sh """
-                    set -e
-                cp /home/ubuntu/Dockerfile .
                     docker build \
                     --build-arg NEXUS_USER=${NEXUS_USER} \
                     --build-arg NEXUS_PASS=${NEXUS_PASS} \
