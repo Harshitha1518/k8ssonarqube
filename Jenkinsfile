@@ -49,7 +49,7 @@ pipeline {
                 nexusArtifactUploader(
                     nexusVersion: 'nexus3',
                     protocol: 'http',
-                    nexusUrl: '3.7.74.172:30002',
+                    nexusUrl: '13.200.17.237:30002',
                     groupId: 'com.example',
                     version: '1.0',
                     repository: 'maven-releases',
