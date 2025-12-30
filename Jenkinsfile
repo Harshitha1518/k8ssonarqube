@@ -8,7 +8,7 @@ pipeline {
     environment {
         PROJECT_KEY = "string-utils-project"
         IMAGE_NAME  = "string-utils"
-        VERSION     = "1.0"
+        VERSION     = "1.0.${BUILD_NUMBER}"
         GROUP_ID    = "com.example"
         ARTIFACT_ID= "string-utils"
         NEXUS_URL  = "http://13.200.17.237:30002"
@@ -45,7 +45,7 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'mvn clean package'
+                sh 'mvn clean package -Drevision=${VERSION}'
             }
         }
 
