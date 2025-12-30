@@ -7,6 +7,11 @@ pipeline {
 
     environment {
         PROJECT_KEY = "string-utils-project"
+        IMAGE_NAME  = "string-utils"
+        VERSION     = "1.0"
+        GROUP_ID    = "com.example"
+        ARTIFACT_ID= "string-utils"
+        NEXUS_URL  = "http://13.200.17.237:30002"
     }
 
     stages {
@@ -22,9 +27,9 @@ pipeline {
             steps {
                 withSonarQubeEnv('sonar-k8s') {
                     sh """
-                        mvn clean verify sonar:sonar \
-                        -Dsonar.projectKey=${PROJECT_KEY} \
-                        -Dsonar.projectName=${PROJECT_KEY}
+                    mvn clean verify sonar:sonar \
+                    -Dsonar.projectKey=${PROJECT_KEY} \
+                    -Dsonar.projectName=${PROJECT_KEY}
                     """
                 }
             }
@@ -50,29 +55,69 @@ pipeline {
                     nexusVersion: 'nexus3',
                     protocol: 'http',
                     nexusUrl: '13.200.17.237:30002',
-                    groupId: 'com.example',
-                    version: '1.0',
+                    groupId: "${GROUP_ID}",
+                    version: "${VERSION}",
                     repository: 'maven-releases',
                     credentialsId: 'harshi',
                     artifacts: [
                         [
-                            artifactId: 'string-utils',
+                            artifactId: "${ARTIFACT_ID}",
                             classifier: '',
-                            file: 'target/string-utils-1.0.jar',
+                            file: "target/${ARTIFACT_ID}-${VERSION}.jar",
                             type: 'jar'
                         ]
                     ]
                 )
             }
         }
+
+        stage('Build Docker Image') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'harshi',
+                    usernameVariable: 'NEXUS_USER',
+                    passwordVariable: 'NEXUS_PASS'
+                )]) {
+                    sh """
+                    docker build \
+                    --build-arg NEXUS_USER=${NEXUS_USER} \
+                    --build-arg NEXUS_PASS=${NEXUS_PASS} \
+                    --build-arg NEXUS_URL=${NEXUS_URL} \
+                    --build-arg GROUP_ID=${GROUP_ID} \
+                    --build-arg ARTIFACT_ID=${ARTIFACT_ID} \
+                    --build-arg VERSION=${VERSION} \
+                    -t ${IMAGE_NAME}:${VERSION} .
+                    """
+                }
+            }
+        }
+
+        stage('Push Image to ECR') {
+            steps {
+                withAWS(credentials: 'ECR-user', region: 'ap-south-1') {
+
+                    sh """
+                    aws ecr get-login-password --region ap-south-1 | \
+                    docker login --username AWS --password-stdin \
+                    426728254540.dkr.ecr.ap-south-1.amazonaws.com
+
+                    docker tag ${IMAGE_NAME}:${VERSION} \
+                    426728254540.dkr.ecr.ap-south-1.amazonaws.com/string-utils:${VERSION}
+
+                    docker push \
+                    426728254540.dkr.ecr.ap-south-1.amazonaws.com/string-utils:${VERSION}
+                    """
+                }
+            }
+        }
     }
 
     post {
         success {
-            echo "Build successful and artifact pushed to Nexus"
+            echo "Docker image successfully pushed to Amazon ECR"
         }
         failure {
-            echo "Pipeline failed"
+            echo "Pipeline failed during Docker/ECR stage"
         }
     }
 }
