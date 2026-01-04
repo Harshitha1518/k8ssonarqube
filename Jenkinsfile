@@ -11,7 +11,7 @@ pipeline {
         VERSION     = "1.0.${BUILD_NUMBER}"
         GROUP_ID    = "com.example"
         ARTIFACT_ID= "string-utils"
-        NEXUS_URL  = "http://13.200.17.237:30002"
+        NEXUS_URL  = "http://13.202.245.6:30002"
     }
 
     stages {
@@ -54,7 +54,7 @@ pipeline {
                 nexusArtifactUploader(
                     nexusVersion: 'nexus3',
                     protocol: 'http',
-                    nexusUrl: '13.200.17.237:30002',
+                    nexusUrl: '13.202.245.6:30002',
                     groupId: "${GROUP_ID}",
                     version: "${VERSION}",
                     repository: 'maven-releases',
