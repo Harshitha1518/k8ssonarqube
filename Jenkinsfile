@@ -8,15 +8,22 @@ pipeline {
     environment {
         PROJECT_KEY = "string-utils-project"
         IMAGE_NAME  = "string-utils"
-        VERSION     = "1.0.${BUILD_NUMBER}"
         GROUP_ID    = "com.example"
-        ARTIFACT_ID= "string-utils"
-        NEXUS_URL  = "http://13.202.245.6:30002"
-        GITOPS_REPO = "https://github.com/jayanthis952/calculator-java-gitops.git"
-        
+        ARTIFACT_ID = "string-utils"
+        NEXUS_URL   = "13.202.245.6:30002"
+        ECR_REPO    = "426728254540.dkr.ecr.ap-south-1.amazonaws.com/string-utils"
+        GIT_REPO    = "https://github.com/Harshitha1518/CI-CD-using-Argocd.git"
     }
 
     stages {
+
+        stage('Set Version') {
+            steps {
+                script {
+                    env.VERSION = "1.0.${BUILD_NUMBER}"
+                }
+            }
+        }
 
         stage('SCM') {
             steps {
@@ -37,7 +44,7 @@ pipeline {
             }
         }
 
-        stage('Quality Gate Validate') {
+        stage('Quality Gate') {
             steps {
                 timeout(time: 5, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
@@ -45,18 +52,18 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Build Jar') {
             steps {
-                sh 'mvn clean package -Drevision=${VERSION}'
+                sh "mvn clean package -Drevision=${VERSION}"
             }
         }
 
-        stage('Nexus-artifactory') {
+        stage('Upload to Nexus') {
             steps {
                 nexusArtifactUploader(
                     nexusVersion: 'nexus3',
                     protocol: 'http',
-                    nexusUrl: '13.202.245.6:30002',
+                    nexusUrl: "${NEXUS_URL}",
                     groupId: "${GROUP_ID}",
                     version: "${VERSION}",
                     repository: 'maven-releases',
@@ -80,7 +87,6 @@ pipeline {
                     usernameVariable: 'NEXUS_USER',
                     passwordVariable: 'NEXUS_PASS'
                 )]) {
-                    
                     sh """
                     docker build \
                     --build-arg NEXUS_USER=${NEXUS_USER} \
@@ -98,17 +104,36 @@ pipeline {
         stage('Push Image to ECR') {
             steps {
                 withAWS(credentials: 'ECR-user', region: 'ap-south-1') {
-
                     sh """
-                    aws ecr get-login-password --region ap-south-1 | \
-                    docker login --username AWS --password-stdin \
-                    426728254540.dkr.ecr.ap-south-1.amazonaws.com
+                    aws ecr get-login-password | docker login --username AWS --password-stdin 426728254540.dkr.ecr.ap-south-1.amazonaws.com
 
-                    docker tag ${IMAGE_NAME}:${VERSION} \
-                    426728254540.dkr.ecr.ap-south-1.amazonaws.com/string-utils:${VERSION}
+                    docker tag ${IMAGE_NAME}:${VERSION} ${ECR_REPO}:${VERSION}
+                    docker push ${ECR_REPO}:${VERSION}
+                    """
+                }
+            }
+        }
 
-                    docker push \
-                    426728254540.dkr.ecr.ap-south-1.amazonaws.com/string-utils:${VERSION}
+        stage('Update ArgoCD Repo') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'github-creds',
+                    usernameVariable: 'GIT_USER',
+                    passwordVariable: 'GIT_TOKEN'
+                )]) {
+                    sh """
+                    rm -rf CI-CD-using-Argocd
+                    git clone https://${GIT_USER}:${GIT_TOKEN}@github.com/Harshitha1518/CI-CD-using-Argocd.git
+                    cd CI-CD-using-Argocd
+
+                    sed -i 's|image:.*|image: ${ECR_REPO}:${VERSION}|' argocd.yaml
+
+                    git config user.name "argouser"
+                    git config user.email "argouser@jenkins.com"
+
+                    git add .
+                    git commit -m "Update image to ${VERSION}"
+                    git push origin main
                     """
                 }
             }
@@ -117,10 +142,11 @@ pipeline {
 
     post {
         success {
-            echo "Docker image successfully pushed to Amazon ECR"
+            echo "CI/CD complete. ArgoCD will now deploy ${VERSION}"
         }
         failure {
-            echo "Pipeline failed during Docker/ECR stage"
+            echo "Pipeline failed"
         }
     }
 }
+
