@@ -12,6 +12,8 @@ pipeline {
         GROUP_ID    = "com.example"
         ARTIFACT_ID= "string-utils"
         NEXUS_URL  = "http://13.202.245.6:30002"
+        GITOPS_REPO = "https://github.com/jayanthis952/calculator-java-gitops.git"
+        
     }
 
     stages {
