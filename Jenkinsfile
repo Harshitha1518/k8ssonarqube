@@ -8,6 +8,7 @@ pipeline {
     environment {
         PROJECT_KEY = "string-utils-project"
         IMAGE_NAME  = "string-utils"
+        VERSION = "1.0.${BUILD_NUMBER}"
         GROUP_ID    = "com.example"
         ARTIFACT_ID = "string-utils"
         NEXUS_URL   = "13.202.245.6:30002"
@@ -16,14 +17,6 @@ pipeline {
     }
 
     stages {
-
-        stage('Set Version') {
-            steps {
-                script {
-                    env.VERSION = "1.0.${BUILD_NUMBER}"
-                }
-            }
-        }
 
         stage('SCM') {
             steps {
