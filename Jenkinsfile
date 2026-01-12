@@ -11,7 +11,7 @@ pipeline {
         VERSION = "1.0.${BUILD_NUMBER}"
         GROUP_ID    = "com.example"
         ARTIFACT_ID = "string-utils"
-        NEXUS_URL   = "13.202.245.6:30002"
+        NEXUS_URL   = "13.205.106.149:30002"
         ECR_REPO    = "426728254540.dkr.ecr.ap-south-1.amazonaws.com/string-utils"
         GIT_REPO    = "https://github.com/Harshitha1518/CI-CD-using-Argocd.git"
     }
