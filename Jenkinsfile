@@ -110,7 +110,7 @@ pipeline {
         stage('Update ArgoCD Repo') {
             steps {
                 withCredentials([usernamePassword(
-                    credentialsId: 'github-creds',
+                    credentialsId: 'Harshitha1518',
                     usernameVariable: 'GIT_USER',
                     passwordVariable: 'GIT_TOKEN'
                 )]) {
