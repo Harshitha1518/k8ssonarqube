@@ -96,7 +96,7 @@ pipeline {
 
         stage('Push Image to ECR') {
             steps {
-                withAWS(credentials: 'ECR-user', region: 'ap-south-1') {
+                withAWS(credentials: 'k8s-user', region: 'ap-south-1') {
                     sh """
                     aws ecr get-login-password | docker login --username AWS --password-stdin 426728254540.dkr.ecr.ap-south-1.amazonaws.com
 
