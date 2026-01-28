@@ -11,15 +11,15 @@
     <packaging>jar</packaging>
 
     <properties>
-        <!-- 🔹 Version controlled by Jenkins -->
-        <revision>1.0-SNAPSHOT</revision>
+        <!-- Version controlled by Jenkins -->
+        <revision>1.0.0</revision>
 
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <!-- 🔹 Nexus Artifact Upload Configuration -->
+    <!-- Nexus upload -->
     <distributionManagement>
         <repository>
             <id>nexus</id>
@@ -41,14 +41,39 @@
     <build>
         <plugins>
 
-            <!-- Surefire Plugin -->
+            <!-- Java compiler -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                </configuration>
+            </plugin>
+
+            <!-- ✅ EXECUTABLE JAR (FIXES CrashLoopBackOff) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>com.example.Main</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <!-- Unit tests -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
             </plugin>
 
-            <!-- JaCoCo Plugin -->
+            <!-- Code coverage -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -69,7 +94,7 @@
                 </executions>
             </plugin>
 
-            <!-- SonarQube Maven Plugin -->
+            <!-- SonarQube -->
             <plugin>
                 <groupId>org.sonarsource.scanner.maven</groupId>
                 <artifactId>sonar-maven-plugin</artifactId>
