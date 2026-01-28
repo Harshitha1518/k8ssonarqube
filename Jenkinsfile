@@ -27,7 +27,7 @@ pipeline {
 
         stage('Sonar Analysis') {
             steps {
-                withSonarQubeEnv('sonar-k8s') {
+                withSonarQubeEnv('sonarcreds') {
                     sh """
                     mvn clean verify sonar:sonar \
                     -Dsonar.projectKey=${PROJECT_KEY} \
